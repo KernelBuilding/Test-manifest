@@ -31,7 +31,7 @@ jobs:
         id: init_repo
         run: |
           echo "Menginisialisasi repo dengan URL: ${{ github.event.inputs.manifest_url }} dan branch: ${{ github.event.inputs.branch }}"
-          repo init -u --depth=1 ${{ github.event.inputs.manifest_url }} -b ${{ github.event.inputs.branch }} || echo "Error: Gagal menginisialisasi repo."
+          repo init --depth=1 -u ${{ github.event.inputs.manifest_url }} -b ${{ github.event.inputs.branch }} || echo "Error: Gagal menginisialisasi repo."
 
       - name: Sync Repo
         id: sync_repo
