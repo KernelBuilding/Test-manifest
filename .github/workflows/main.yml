@@ -19,22 +19,25 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Set Up Repo
+      - name: Create bin Directory and Download Repo
         run: |
-          sudo apt-get update
-          sudo apt-get install -y repo
+          mkdir ~/bin
+          echo "PATH=~/bin:$PATH" >> $GITHUB_ENV
+          cd ~/bin
+          curl -O http://commondatastorage.googleapis.com/git-repo-downloads/repo
+          chmod a+x ~/bin/repo
 
       - name: Initialize Repo
         id: init_repo
         run: |
           echo "Menginisialisasi repo dengan URL: ${{ github.event.inputs.manifest_url }} dan branch: ${{ github.event.inputs.branch }}"
-          repo init -u --depth=1 ${{ github.event.inputs.manifest_url }} -b ${{ github.event.inputs.branch }} || echo "Error: Gagal menginisialisasi repo."
+          ~/bin/repo init -u --depth=1 ${{ github.event.inputs.manifest_url }} -b ${{ github.event.inputs.branch }} || echo "Error: Gagal menginisialisasi repo."
 
       - name: Sync Repo
         id: sync_repo
         run: |
           echo "Menjalankan repo sync..."
-          if ! repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags; then
+          if ! ~/bin/repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags; then
             echo "Error: Gagal melakukan sync repo."
             exit 1
           fi
