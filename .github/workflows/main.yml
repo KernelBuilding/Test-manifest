@@ -31,22 +31,10 @@ jobs:
         id: init_repo
         run: |
           echo "Menginisialisasi repo dengan URL: ${{ github.event.inputs.manifest_url }} dan branch: ${{ github.event.inputs.branch }}"
-          ~/bin/repo init -u --depth=1 ${{ github.event.inputs.manifest_url }} -b ${{ github.event.inputs.branch }} || echo "Error: Gagal menginisialisasi repo."
+          repo init -u --depth=1 ${{ github.event.inputs.manifest_url }} -b ${{ github.event.inputs.branch }} || echo "Error: Gagal menginisialisasi repo."
 
       - name: Sync Repo
         id: sync_repo
         run: |
           echo "Menjalankan repo sync..."
-          if ! ~/bin/repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags; then
-            echo "Error: Gagal melakukan sync repo."
-            exit 1
-          fi
-
-      - name: Check Errors
-        run: |
-          if [[ "${{ steps.init_repo.outcome }}" == "failure" ]]; then
-            echo "Gagal menginisialisasi repo."
-          fi
-          if [[ "${{ steps.sync_repo.outcome }}" == "failure" ]]; then
-            echo "Gagal melakukan sync repo."
-          fi
+          repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
