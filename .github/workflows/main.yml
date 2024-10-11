@@ -1,0 +1,49 @@
+name: Test Android Manifest
+
+on:
+  workflow_dispatch:
+    inputs:
+      manifest_url:
+        description: 'URL untuk Android manifest'
+        required: true
+        default: 'https://github.com/ScandiumOS/android_scandium_manifest.git'
+      branch:
+        description: 'Branch yang ingin diuji'
+        required: true
+        default: 'Holocaust_A13'
+
+jobs:
+  test-manifest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set Up Repo
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y repo
+
+      - name: Initialize Repo
+        id: init_repo
+        run: |
+          echo "Menginisialisasi repo dengan URL: ${{ github.event.inputs.manifest_url }} dan branch: ${{ github.event.inputs.branch }}"
+          repo init -u --depth=1 ${{ github.event.inputs.manifest_url }} -b ${{ github.event.inputs.branch }} || echo "Error: Gagal menginisialisasi repo."
+
+      - name: Sync Repo
+        id: sync_repo
+        run: |
+          echo "Menjalankan repo sync..."
+          if ! repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags; then
+            echo "Error: Gagal melakukan sync repo."
+            exit 1
+          fi
+
+      - name: Check Errors
+        run: |
+          if [[ "${{ steps.init_repo.outcome }}" == "failure" ]]; then
+            echo "Gagal menginisialisasi repo."
+          fi
+          if [[ "${{ steps.sync_repo.outcome }}" == "failure" ]]; then
+            echo "Gagal melakukan sync repo."
+          fi
